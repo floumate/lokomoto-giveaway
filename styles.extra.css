@@ -325,14 +325,24 @@
 .thanks__ps {
   background-color: var(--color-card);
   border-radius: var(--radius-md);
-  padding: 18px 22px;
-  font-size: 15px;
-  line-height: 1.6;
+  padding: 20px 24px;
+  margin-top: 4px;
+  font-size: 17.5px;
+  font-weight: 500;
+  line-height: 1.55;
   color: var(--color-text);
   width: 100%;
 }
 
+@media (min-width: 768px) {
+  .thanks__ps { font-size: 19px; }
+}
+
 .thanks__ps strong { color: var(--color-primary); }
+
+/* Referral link — popunjava se kad napravimo referral sistem */
+.thanks__referral { width: 100%; margin-top: 16px; }
+.thanks__referral[hidden] { display: none; }
 
 
 /* ---------- WELCOME paragrafi (tačan copy sa Google forme) ---------- */

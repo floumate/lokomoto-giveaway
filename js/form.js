@@ -181,10 +181,6 @@ const Form = (function() {
 
         <p class="welcome-hero__para">Srećno 🚀</p>
 
-        <div class="welcome-hero__note">
-          P.S.&nbsp; Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi — nagradu osvajaš i ti 🍀
-        </div>
-
         <div class="actions">
           <button class="btn btn--primary btn--large" id="startBtn">KRENI ›</button>
         </div>
@@ -1121,14 +1117,15 @@ const Form = (function() {
             <path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="10"></circle>
           </svg>
         </div>
-        <h2 class="thanks__title">Prijava je uspešno poslata! 🎉</h2>
-        <p class="thanks__text">
-          Hvala što si popunio/la prijavu. Ako budeš izabran/a, javljamo ti se na ostavljene kontakt podatke.
-          Pobednika proglašavamo uživo na Instagram live-u <strong>24. juna</strong>.
-        </p>
+        <h2 class="thanks__title">Hvala ti na prijavi</h2>
+
         <div class="thanks__ps">
-          <strong>P.S.</strong> Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi — nagradu osvajaš i ti 🍀
+          P.S.&nbsp; Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi — nagradu osvajaš i ti 🍀
         </div>
+
+        <!-- REFERRAL LINK — dolazi kasnije (ceo referral sistem radimo naknadno).
+             Ovde ide korisnikov jedinstveni link za deljenje, ispod P.S. teksta. -->
+        <div class="thanks__referral" id="referralSlot" hidden></div>
       </div>
     `;
     setScreen(html, 'thanks', null, { hideBack: true });
