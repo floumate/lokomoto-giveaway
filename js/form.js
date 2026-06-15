@@ -912,7 +912,7 @@ const Form = (function() {
         <input type="file" id="mriInput" accept="image/*,application/pdf" hidden />
         <button type="button" class="upload-btn" id="mriBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          Priloži snimak
+          <span id="mriBtnLabel">Priloži snimak</span>
         </button>
         <div class="upload-file" id="mriFileRow" style="display:none;">
           <span class="upload-file__name" id="mriFileName"></span>
@@ -950,9 +950,12 @@ const Form = (function() {
     const MAX_BASE64 = Math.floor(3.4 * 1024 * 1024);
     const HARD_MAX_FILE = 20 * 1024 * 1024;
 
+    const mriBtnLabel = document.getElementById('mriBtnLabel');
+    function setUploadLabel(hasFile) { mriBtnLabel.textContent = hasFile ? 'Izmeni snimak' : 'Priloži snimak'; }
+
     // Prikaži već priložen fajl (back navigacija)
     const existing = State.getMriFile();
-    if (existing) { fileName.textContent = existing.name; fileRow.style.display = 'flex'; }
+    if (existing) { fileName.textContent = existing.name; fileRow.style.display = 'flex'; setUploadLabel(true); }
 
     mriBtn.addEventListener('click', () => fileInput.click());
 
@@ -962,11 +965,13 @@ const Form = (function() {
         fileInput.value = '';
         State.setMriFile(null);
         fileRow.style.display = 'none';
+        setUploadLabel(false);
         return;
       }
       State.setMriFile({ name: name, type: type, base64: base64 });
       fileName.textContent = name;
       fileRow.style.display = 'flex';
+      setUploadLabel(true);
     }
 
     fileInput.addEventListener('change', () => {
@@ -1015,6 +1020,7 @@ const Form = (function() {
       State.setMriFile(null);
       fileInput.value = '';
       fileRow.style.display = 'none';
+      setUploadLabel(false);
     });
 
     continueBtn.addEventListener('click', () => {
