@@ -945,7 +945,10 @@ const Form = (function() {
     const fileRow = document.getElementById('mriFileRow');
     const fileName = document.getElementById('mriFileName');
     const fileErr = document.getElementById('mriErr');
-    const MAX_BYTES = 5 * 1024 * 1024;
+    // Make webhook prima do ~5MB payload-a. base64 je ~1.33x veličine fajla, pa
+    // finalni base64 držimo ispod ~3.4MB. Slike kompresujemo u browseru pre slanja.
+    const MAX_BASE64 = Math.floor(3.4 * 1024 * 1024);
+    const HARD_MAX_FILE = 20 * 1024 * 1024;
 
     // Prikaži već priložen fajl (back navigacija)
     const existing = State.getMriFile();
@@ -953,24 +956,59 @@ const Form = (function() {
 
     mriBtn.addEventListener('click', () => fileInput.click());
 
+    function finishMri(name, type, base64) {
+      if (!base64 || base64.length > MAX_BASE64) {
+        fileErr.textContent = 'Fajl je prevelik za slanje. Priloži manju sliku ili fotografiši nalaz telefonom.';
+        fileInput.value = '';
+        State.setMriFile(null);
+        fileRow.style.display = 'none';
+        return;
+      }
+      State.setMriFile({ name: name, type: type, base64: base64 });
+      fileName.textContent = name;
+      fileRow.style.display = 'flex';
+    }
+
     fileInput.addEventListener('change', () => {
       fileErr.textContent = '';
       const file = fileInput.files[0];
       if (!file) return;
-      if (file.size > MAX_BYTES) {
-        fileErr.textContent = 'Fajl je prevelik (maksimalno 5MB).';
+      if (file.size > HARD_MAX_FILE) {
+        fileErr.textContent = 'Fajl je prevelik (maksimalno 20MB).';
         fileInput.value = '';
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = String(reader.result).split(',')[1] || '';
-        State.setMriFile({ name: file.name, type: file.type, base64 });
-        fileName.textContent = file.name;
-        fileRow.style.display = 'flex';
-      };
-      reader.onerror = () => { fileErr.textContent = 'Greška pri čitanju fajla.'; };
-      reader.readAsDataURL(file);
+
+      if (file.type.indexOf('image/') === 0) {
+        // Kompresuj sliku (smanji rezoluciju + JPEG) da payload ostane ispod Make limita
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const MAXDIM = 1600;
+          let w = img.naturalWidth, h = img.naturalHeight;
+          if (w > MAXDIM || h > MAXDIM) {
+            if (w >= h) { h = Math.round(h * MAXDIM / w); w = MAXDIM; }
+            else { w = Math.round(w * MAXDIM / h); h = MAXDIM; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          let q = 0.7;
+          let dataUrl = canvas.toDataURL('image/jpeg', q);
+          while (dataUrl.length > MAX_BASE64 && q > 0.4) { q -= 0.15; dataUrl = canvas.toDataURL('image/jpeg', q); }
+          const base64 = dataUrl.split(',')[1] || '';
+          finishMri(file.name.replace(/\.[^.]+$/, '') + '.jpg', 'image/jpeg', base64);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); fileErr.textContent = 'Greška pri obradi slike.'; };
+        img.src = url;
+      } else {
+        // PDF / ostalo — ne može kompresija; mora da bude dovoljno mali
+        const reader = new FileReader();
+        reader.onload = () => finishMri(file.name, file.type, String(reader.result).split(',')[1] || '');
+        reader.onerror = () => { fileErr.textContent = 'Greška pri čitanju fajla.'; };
+        reader.readAsDataURL(file);
+      }
     });
 
     document.getElementById('mriRemove').addEventListener('click', () => {

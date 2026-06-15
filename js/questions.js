@@ -106,7 +106,7 @@ const Questions = (function() {
       ],
       upload: {
         label: 'Ukoliko imaš izveštaj sa magnetne rezonance možeš ovde da ga priložiš.',
-        hint: 'Maksimalno 5MB. Slika ili PDF.',
+        hint: 'Slika ili PDF. Velike slike se automatski smanjuju pre slanja.',
       },
     },
 

@@ -10,9 +10,10 @@ const API = (function() {
   const WEBHOOK_URL = 'https://hook.eu1.make.com/81eilkx1tl9xxsi915kajukkc8mwudil';
 
   /**
-   * Šalje kompletan payload. Fire-and-forget sa keepalive da preživi
-   * eventualni redirect / zatvaranje taba posle submita.
-   * Vraća { success } na osnovu HTTP statusa kada uspe da pročita odgovor.
+   * Šalje kompletan payload na webhook i čeka odgovor.
+   * NAPOMENA: BEZ keepalive — fetch standard ograničava keepalive zahteve na 64KB
+   * body-ja, pa bi slanje sa priloženim MRI snimkom (base64) puklo. Forma ne radi
+   * redirect posle slanja (thank-you je u mestu), pa keepalive i nije potreban.
    */
   async function submitForm(payload) {
     try {
@@ -20,7 +21,6 @@ const API = (function() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        keepalive: true,
       });
 
       if (!response.ok) {
