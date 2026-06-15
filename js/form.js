@@ -21,37 +21,39 @@ const Form = (function() {
   let screenCleanup = null;
   let activeFlatpickr = null;
 
-  // ---- Intl telefon (isto kao onboarding forma) ----
-  const COUNTRIES = [
-    { c: 'RS', n: 'Srbija',              d: '+381' },
-    { c: 'BA', n: 'Bosna i Hercegovina', d: '+387' },
-    { c: 'ME', n: 'Crna Gora',           d: '+382' },
-    { c: 'HR', n: 'Hrvatska',            d: '+385' },
-    { c: 'SI', n: 'Slovenija',           d: '+386' },
-    { c: 'MK', n: 'Severna Makedonija',  d: '+389' },
-    { c: 'AL', n: 'Albanija',            d: '+355' },
-    { c: 'BG', n: 'Bugarska',            d: '+359' },
-    { c: 'RO', n: 'Rumunija',            d: '+40'  },
-    { c: 'HU', n: 'Mađarska',            d: '+36'  },
-    { c: 'AT', n: 'Austrija',            d: '+43'  },
-    { c: 'DE', n: 'Nemačka',             d: '+49'  },
-    { c: 'CH', n: 'Švajcarska',          d: '+41'  },
-    { c: 'IT', n: 'Italija',             d: '+39'  },
-    { c: 'FR', n: 'Francuska',           d: '+33'  },
-    { c: 'NL', n: 'Holandija',           d: '+31'  },
-    { c: 'BE', n: 'Belgija',             d: '+32'  },
-    { c: 'SE', n: 'Švedska',             d: '+46'  },
-    { c: 'NO', n: 'Norveška',            d: '+47'  },
-    { c: 'DK', n: 'Danska',              d: '+45'  },
-    { c: 'GB', n: 'Velika Britanija',    d: '+44'  },
-    { c: 'IE', n: 'Irska',               d: '+353' },
-    { c: 'ES', n: 'Španija',             d: '+34'  },
-    { c: 'PT', n: 'Portugal',            d: '+351' },
-    { c: 'GR', n: 'Grčka',               d: '+30'  },
-    { c: 'US', n: 'SAD',                 d: '+1'   },
-    { c: 'CA', n: 'Kanada',              d: '+1'   },
-    { c: 'AU', n: 'Australija',          d: '+61'  }
-  ];
+  // ---- Intl telefon: SVE zemlje (generisano iz libphonenumber + srpska imena preko Intl.DisplayNames) ----
+  const COUNTRIES = (function buildCountries() {
+    var FALLBACK = [
+      { c: 'RS', n: 'Srbija', d: '+381' },
+      { c: 'BA', n: 'Bosna i Hercegovina', d: '+387' },
+      { c: 'ME', n: 'Crna Gora', d: '+382' },
+      { c: 'HR', n: 'Hrvatska', d: '+385' },
+      { c: 'SI', n: 'Slovenija', d: '+386' },
+      { c: 'MK', n: 'Severna Makedonija', d: '+389' }
+    ];
+    if (!window.libphonenumber || !libphonenumber.getCountries) return FALLBACK;
+    var names = null;
+    try { names = new Intl.DisplayNames(['sr-Latn', 'sr', 'en'], { type: 'region' }); } catch (e) {}
+    var PRIORITY = ['RS', 'BA', 'ME', 'HR', 'SI', 'MK'];
+    var all = [];
+    libphonenumber.getCountries().forEach(function (code) {
+      var dial;
+      try { dial = '+' + libphonenumber.getCountryCallingCode(code); } catch (e) { return; }
+      var name = code;
+      if (names) { try { name = names.of(code) || code; } catch (e2) {} }
+      all.push({ c: code, n: name, d: dial });
+    });
+    if (!all.length) return FALLBACK;
+    var inPriority = {};
+    PRIORITY.forEach(function (p) { inPriority[p] = true; });
+    var top = [];
+    PRIORITY.forEach(function (p) {
+      for (var i = 0; i < all.length; i++) { if (all[i].c === p) { top.push(all[i]); break; } }
+    });
+    var rest = all.filter(function (x) { return !inPriority[x.c]; })
+      .sort(function (a, b) { return a.n.localeCompare(b.n, 'sr'); });
+    return top.concat(rest);
+  })();
 
   // Pamti izbor zemlje + uneti broj kroz back/forward navigaciju
   let selectedCountry = findCountry('RS');
@@ -392,20 +394,30 @@ const Form = (function() {
       }
     }
 
-    let attempted = false;
-
-    phoneIn.addEventListener('input', () => {
+    // Blur/touched validacija — error iskače čim klikneš sa strane (kao na teodoradunja formi),
+    // ne samo na dugme. Dok je polje u grešci, ispravlja se uživo dok korisnik kuca.
+    const touched = {};
+    function fieldHasError(name) {
+      const f = document.querySelector('.field[data-field="' + name + '"]');
+      return f && f.classList.contains('error');
+    }
+    function wireField(name, el, validator, onInput) {
+      el.addEventListener('focus', () => { touched[name] = true; });
+      el.addEventListener('blur', () => { if (touched[name]) validator(); });
+      el.addEventListener('input', () => {
+        if (onInput) onInput();
+        if (fieldHasError(name)) validator();
+      });
+    }
+    wireField('fullName', document.getElementById('fullName'), validateName);
+    wireField('email', document.getElementById('email'), validateEmail);
+    wireField('phone', phoneIn, validatePhone, () => {
       phoneIn.value = phoneIn.value.replace(/[^\d\s\-()+]/g, '');
       autoDetectFromDialCode();
-      if (attempted) validatePhone();
     });
-
-    document.getElementById('fullName').addEventListener('input', () => { if (attempted) validateName(); });
-    document.getElementById('email').addEventListener('input', () => { if (attempted) validateEmail(); });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      attempted = true;
       const nameOk = validateName();
       const emailOk = validateEmail();
       const phoneOk = validatePhone();
