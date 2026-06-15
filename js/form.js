@@ -1207,8 +1207,11 @@ const Form = (function() {
 })();
 
 
-document.addEventListener('DOMContentLoaded', () => {
+// Radi i kao samostalna stranica i kao Webflow embed (gde DOMContentLoaded može već da prođe)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => Form.init());
+} else {
   Form.init();
-});
+}
 
 console.log('[form.js] učitan');
