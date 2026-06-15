@@ -29,18 +29,20 @@ const Form = (function() {
       { c: 'ME', n: 'Crna Gora', d: '+382' },
       { c: 'HR', n: 'Hrvatska', d: '+385' },
       { c: 'SI', n: 'Slovenija', d: '+386' },
-      { c: 'MK', n: 'Severna Makedonija', d: '+389' }
+      { c: 'MK', n: 'Makedonija', d: '+389' },
+      { c: 'BG', n: 'Bugarska', d: '+359' }
     ];
     if (!window.libphonenumber || !libphonenumber.getCountries) return FALLBACK;
     var names = null;
     try { names = new Intl.DisplayNames(['sr-Latn', 'sr', 'en'], { type: 'region' }); } catch (e) {}
-    var PRIORITY = ['RS', 'BA', 'ME', 'HR', 'SI', 'MK'];
+    var PRIORITY = ['RS', 'BA', 'ME', 'HR', 'SI', 'MK', 'BG'];
     var all = [];
     libphonenumber.getCountries().forEach(function (code) {
       var dial;
       try { dial = '+' + libphonenumber.getCountryCallingCode(code); } catch (e) { return; }
       var name = code;
       if (names) { try { name = names.of(code) || code; } catch (e2) {} }
+      if (code === 'MK') name = 'Makedonija';
       all.push({ c: code, n: name, d: dial });
     });
     if (!all.length) return FALLBACK;
@@ -1132,7 +1134,7 @@ const Form = (function() {
         <h2 class="thanks__title">Hvala ti na prijavi</h2>
 
         <div class="thanks__ps">
-          P.S.&nbsp; Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi — nagradu osvajaš i ti 🍀
+          P.S.&nbsp; Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi - nagradu osvajaš i ti 🍀
         </div>
 
         <!-- REFERRAL LINK — dolazi kasnije (ceo referral sistem radimo naknadno).
