@@ -1133,7 +1133,8 @@ const Form = (function() {
       kontrola_mokrenja: a.kontrola_mokrenja || '',
       temperatura_gubitak_tezine: a.temperatura_gubitak_tezine || '',
       trauma: a.trauma || '',
-      trauma_opis: a.trauma_opis || '',
+      // Prefiks ": " da bi u Make-u {{trauma}}{{trauma_opis}} dalo "Ne" ili "Da: opis"
+      trauma_opis: a.trauma_opis ? (': ' + a.trauma_opis) : '',
       terapija_lekara: a.terapija_lekara || '',
       moze_dolaziti_3x: a.moze_dolaziti_3x || '',
 
