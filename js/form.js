@@ -79,9 +79,18 @@ const Form = (function() {
   // REFERRAL SISTEM (lokomoto-referral-system)
   // Popuni REFERRAL_API posle Vercel deploy-a. Ako je prazan, referral se preskače.
   // ============================================
-  const REFERRAL_API = ''; // npr. 'https://lokomoto-referral-system.vercel.app/api/signup'
+  const REFERRAL_API = ''; // npr. 'https://lokomoto-referral-system.vercel.app/api/signup' — kad se postavi, ide pravi Supabase backend
+  const GIVEAWAY_SHARE_URL = 'https://floumate.github.io/lokomoto-giveaway/'; // baza za referral link (lokalni mod bez Supabase-a)
   const REF_KEY = 'lk_ref';
   const SIGNUP_KEY = 'lk_signup';
+
+  // Klijentski generator koda (lokalni mod). Isti alfabet kao Supabase gen_ref_code (bez 0/O/I/1).
+  function genRefCode() {
+    const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 6; i++) s += a.charAt(Math.floor(Math.random() * a.length));
+    return s;
+  }
 
   function captureRefCode() {
     try {
@@ -102,7 +111,11 @@ const Form = (function() {
       const name = State.getAnswer('ime_prezime') || '';
       const email = State.getAnswer('email') || '';
       const ref = getStoredRef();
-      localStorage.setItem(SIGNUP_KEY, JSON.stringify({ email, name, ref, ts: Date.now() }));
+      // Lokalni kod (za thank-you u modu bez Supabase-a) — zadrži isti između poseta
+      let prev = {};
+      try { prev = JSON.parse(localStorage.getItem(SIGNUP_KEY) || '{}'); } catch (e) {}
+      const localRefCode = prev.localRefCode || genRefCode();
+      localStorage.setItem(SIGNUP_KEY, JSON.stringify({ email, name, ref, localRefCode, ts: Date.now() }));
       if (REFERRAL_API && email) {
         fetch(REFERRAL_API, {
           method: 'POST',

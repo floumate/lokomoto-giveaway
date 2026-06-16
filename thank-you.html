@@ -54,32 +54,43 @@
 
   <script>
   (function () {
-    // Isti URL kao REFERRAL_API u js/form.js. Popuni posle Vercel deploy-a.
+    // Isti config kao u js/form.js. Kad postaviš REFERRAL_API → ide pravi Supabase backend.
     var REFERRAL_API = ''; // npr. 'https://lokomoto-referral-system.vercel.app/api/signup'
+    var GIVEAWAY_SHARE_URL = 'https://floumate.github.io/lokomoto-giveaway/'; // baza za link (lokalni mod)
+    var DASHBOARD_URL = ''; // Vercel dashboard baza; prazno = sakrij "prati prijave" liniju
 
     var slot = document.getElementById('referralSlot');
     if (!slot) return;
 
     var signup = readSignup();
-    if (!REFERRAL_API || !signup.email) return; // nema podataka — sakrij widget
 
-    slot.hidden = false;
-    slot.innerHTML = '<div class="ref-card"><div class="ref-card__status">Pripremamo tvoj referral link…</div></div>';
+    if (REFERRAL_API && signup.email) {
+      // PRAVI BACKEND (Supabase preko Vercel-a)
+      slot.hidden = false;
+      slot.innerHTML = '<div class="ref-card"><div class="ref-card__status">Pripremamo tvoj referral link…</div></div>';
+      fetch(REFERRAL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signup.email, name: signup.name, ref: signup.ref }),
+      })
+        .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
+        .then(function (data) { renderCard(data.shareUrl || '', data.dashboardUrl || ''); })
+        .catch(function () {
+          slot.innerHTML = '<div class="ref-card"><div class="ref-card__status">Link će uskoro biti dostupan. Osveži stranicu za minut.</div></div>';
+        });
+    } else if (signup.localRefCode) {
+      // LOKALNI MOD (bez Supabase-a): odmah prikaži generisani link
+      slot.hidden = false;
+      var localShare = GIVEAWAY_SHARE_URL + (GIVEAWAY_SHARE_URL.indexOf('?') > -1 ? '&' : '?') + 'r=' + signup.localRefCode;
+      var localDash = DASHBOARD_URL ? (DASHBOARD_URL + '/?demo=1') : '';
+      renderCard(localShare, localDash);
+    }
+    // else: nema prijave u localStorage — widget ostaje sakriven
 
-    fetch(REFERRAL_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: signup.email, name: signup.name, ref: signup.ref }),
-    })
-      .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
-      .then(renderCard)
-      .catch(function () {
-        slot.innerHTML = '<div class="ref-card"><div class="ref-card__status">Link će uskoro biti dostupan. Osveži stranicu za minut.</div></div>';
-      });
-
-    function renderCard(data) {
-      var share = data.shareUrl || '';
-      var dash = data.dashboardUrl || '#';
+    function renderCard(share, dash) {
+      var hint = dash
+        ? 'Podeli ga sa prijateljima — svaka prijava preko tvog linka ti povećava šanse. Prati ih na <a href="' + esc(dash) + '" target="_blank" rel="noopener">svojoj platformi</a>.'
+        : 'Podeli ga sa prijateljima — svaka prijava preko tvog linka ti povećava šanse, a ako neko koga pozoveš pobedi, nagradu osvajaš i ti 🍀';
       slot.innerHTML =
         '<div class="ref-card">' +
           '<div class="ref-card__label">Tvoj referral link</div>' +
@@ -87,7 +98,7 @@
             '<input class="ref-card__input" id="refInput" value="' + esc(share) + '" readonly />' +
             '<button class="ref-card__btn" id="refCopyBtn" type="button">Kopiraj</button>' +
           '</div>' +
-          '<p class="ref-card__hint">Podeli ga sa prijateljima — svaka prijava preko tvog linka ti povećava šanse. Prati ih na <a href="' + esc(dash) + '" target="_blank" rel="noopener">svojoj platformi</a>.</p>' +
+          '<p class="ref-card__hint">' + hint + '</p>' +
         '</div>';
       var btn = document.getElementById('refCopyBtn');
       var input = document.getElementById('refInput');
@@ -108,7 +119,7 @@
         var raw = localStorage.getItem('lk_signup');
         if (!raw) return {};
         var o = JSON.parse(raw);
-        return { email: (o && o.email) || '', name: (o && o.name) || '', ref: (o && o.ref) || '' };
+        return { email: (o && o.email) || '', name: (o && o.name) || '', ref: (o && o.ref) || '', localRefCode: (o && o.localRefCode) || '' };
       } catch (e) { return {}; }
     }
     function esc(s) {
