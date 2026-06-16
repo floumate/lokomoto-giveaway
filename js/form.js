@@ -1107,8 +1107,16 @@ const Form = (function() {
       return;
     }
 
-    // Redirect na zasebnu thank-you stranicu (zbog Meta Pixel-a / praćenja konverzije)
-    window.location.href = 'hvala.html';
+    // Posle slanja: ako je forma u iframe-u (Webflow), javi roditeljskoj stranici da ode
+    // na svoju Thank You stranicu (da Meta Pixel okine na pravom Webflow URL-u).
+    // Ako nije u iframe-u (standalone), idi direktno na thank-you.html.
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage('lokomoto-giveaway:submitted', '*');
+        return;
+      }
+    } catch (e) {}
+    window.location.href = 'thank-you.html';
   }
 
   function buildPayload() {
