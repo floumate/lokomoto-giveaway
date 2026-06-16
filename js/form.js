@@ -75,11 +75,53 @@ const Form = (function() {
   }
 
 
+  // ============================================
+  // REFERRAL SISTEM (lokomoto-referral-system)
+  // Popuni REFERRAL_API posle Vercel deploy-a. Ako je prazan, referral se preskače.
+  // ============================================
+  const REFERRAL_API = ''; // npr. 'https://lokomoto-referral-system.vercel.app/api/signup'
+  const REF_KEY = 'lk_ref';
+  const SIGNUP_KEY = 'lk_signup';
+
+  function captureRefCode() {
+    try {
+      const code = new URLSearchParams(window.location.search).get('r');
+      if (!code) return;
+      const clean = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+      if (clean.length >= 4) localStorage.setItem(REF_KEY, clean);
+    } catch (e) {}
+  }
+
+  function getStoredRef() {
+    try { return localStorage.getItem(REF_KEY) || ''; } catch (e) { return ''; }
+  }
+
+  // Zapamti prijavu (za thank-you widget) + pošalji u referral sistem. Pozvati pri uspešnom slanju.
+  function recordReferralSignup() {
+    try {
+      const name = State.getAnswer('ime_prezime') || '';
+      const email = State.getAnswer('email') || '';
+      const ref = getStoredRef();
+      localStorage.setItem(SIGNUP_KEY, JSON.stringify({ email, name, ref, ts: Date.now() }));
+      if (REFERRAL_API && email) {
+        fetch(REFERRAL_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name, ref }),
+          keepalive: true, // mali payload — preživi redirect parent stranice
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+
   function init() {
     screensContainer = document.getElementById('quizScreens');
     progressBar = document.getElementById('progressBar');
     progressBarFill = document.getElementById('progressBarFill');
     globalBackBtn = document.getElementById('globalBackBtn');
+
+    captureRefCode();
 
     globalBackBtn.addEventListener('click', () => {
       if (currentBackHandler) currentBackHandler();
@@ -1106,6 +1148,9 @@ const Form = (function() {
       }
       return;
     }
+
+    // Referral: zapamti prijavu + pošalji u referral sistem (svaka prijava dobija svoj ref kod)
+    recordReferralSignup();
 
     // Posle slanja: ako je forma u iframe-u (Webflow), javi roditeljskoj stranici da ode
     // na svoju Thank You stranicu (da Meta Pixel okine na pravom Webflow URL-u).
