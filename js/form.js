@@ -1107,7 +1107,8 @@ const Form = (function() {
       return;
     }
 
-    showThanks();
+    // Redirect na zasebnu thank-you stranicu (zbog Meta Pixel-a / praćenja konverzije)
+    window.location.href = 'hvala.html';
   }
 
   function buildPayload() {
