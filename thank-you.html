@@ -68,12 +68,7 @@
       // PRAVI BACKEND (Supabase preko Vercel-a)
       slot.hidden = false;
       slot.innerHTML = '<div class="ref-card"><div class="ref-card__status">Pripremamo tvoj referral link…</div></div>';
-      fetch(REFERRAL_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: signup.email, name: signup.name, ref: signup.ref }),
-      })
-        .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
+      postSignup(1)
         .then(function (data) { renderCard(data.shareUrl || '', data.dashboardUrl || ''); })
         .catch(function () {
           slot.innerHTML = '<div class="ref-card"><div class="ref-card__status">Link će uskoro biti dostupan. Osveži stranicu za minut.</div></div>';
@@ -86,6 +81,22 @@
       renderCard(localShare, localDash);
     }
     // else: nema prijave u localStorage - widget ostaje sakriven
+
+    // POST sa retry-em (3 pokušaja) — preživi Vercel/Supabase cold start
+    function postSignup(attempt) {
+      return fetch(REFERRAL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signup.email, name: signup.name, ref: signup.ref }),
+      })
+        .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
+        .catch(function (err) {
+          if (attempt < 3) {
+            return new Promise(function (res) { setTimeout(res, 900); }).then(function () { return postSignup(attempt + 1); });
+          }
+          throw err;
+        });
+    }
 
     function renderCard(share, dash) {
       var hint = dash
