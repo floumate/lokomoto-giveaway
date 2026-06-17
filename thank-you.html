@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Hvala ti na prijavi — Lokomoto Centar</title>
+  <title>Hvala ti na prijavi - Lokomoto Centar</title>
 
   <!-- NAPOMENA: Meta Pixel NE ide ovde nego na sam Webflow Thank You page
        (Page Settings → Custom Code → Head), jer se forma embed-uje preko iframe-a
@@ -47,7 +47,7 @@
         P.S.&nbsp; Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi - nagradu osvajaš i ti 🍀
       </div>
 
-      <!-- REFERRAL LINK — widget se popunjava iz lokomoto-referral-system -->
+      <!-- REFERRAL LINK - widget se popunjava iz lokomoto-referral-system -->
       <div class="thanks__referral" id="referralSlot" hidden></div>
     </div>
   </div>
@@ -85,12 +85,12 @@
       var localDash = DASHBOARD_URL ? (DASHBOARD_URL + '/?demo=1') : '';
       renderCard(localShare, localDash);
     }
-    // else: nema prijave u localStorage — widget ostaje sakriven
+    // else: nema prijave u localStorage - widget ostaje sakriven
 
     function renderCard(share, dash) {
       var hint = dash
-        ? 'Podeli ga sa prijateljima — svaka prijava preko tvog linka ti povećava šanse. Prati ih na <a href="' + esc(dash) + '" target="_blank" rel="noopener">svojoj platformi</a>.'
-        : 'Podeli ga sa prijateljima — svaka prijava preko tvog linka ti povećava šanse, a ako neko koga pozoveš pobedi, nagradu osvajaš i ti 🍀';
+        ? 'Podeli ga sa prijateljima - svaka prijava preko tvog linka ti povećava šanse. Prati ih na <a href="' + esc(dash) + '" target="_blank" rel="noopener">svojoj platformi</a>.'
+        : 'Podeli ga sa prijateljima - svaka prijava preko tvog linka ti povećava šanse, a ako neko koga pozoveš pobedi, nagradu osvajaš i ti 🍀';
       slot.innerHTML =
         '<div class="ref-card">' +
           '<div class="ref-card__label">Tvoj referral link</div>' +

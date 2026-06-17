@@ -1,5 +1,5 @@
 // ============================================
-// FORM — Glavni kontroler (Lokomoto Giveaway prijava)
+// FORM - Glavni kontroler (Lokomoto Giveaway prijava)
 // Config-driven step engine: čita Questions.STEPS i renderuje po tipu.
 // Tok je linearan (nema grananja) → pratimo samo currentIndex.
 // ============================================
@@ -111,7 +111,7 @@ const Form = (function() {
       const name = State.getAnswer('ime_prezime') || '';
       const email = State.getAnswer('email') || '';
       const ref = getStoredRef();
-      // Lokalni kod (za thank-you u modu bez Supabase-a) — zadrži isti između poseta
+      // Lokalni kod (za thank-you u modu bez Supabase-a) - zadrži isti između poseta
       let prev = {};
       try { prev = JSON.parse(localStorage.getItem(SIGNUP_KEY) || '{}'); } catch (e) {}
       const localRefCode = prev.localRefCode || genRefCode();
@@ -121,7 +121,7 @@ const Form = (function() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, name, ref }),
-          keepalive: true, // mali payload — preživi redirect parent stranice
+          keepalive: true, // mali payload - preživi redirect parent stranice
         }).catch(() => {});
       }
     } catch (e) {}
@@ -421,7 +421,7 @@ const Form = (function() {
 
     setCountry(selectedCountry);
 
-    // IP geolokacija — samo prvi put (posle koristi zapamćeni izbor)
+    // IP geolokacija - samo prvi put (posle koristi zapamćeni izbor)
     if (!ipDetected) {
       ipDetected = true;
       detectCountryByIP((code) => {
@@ -451,7 +451,7 @@ const Form = (function() {
       }
     }
 
-    // Blur/touched validacija — error iskače čim klikneš sa strane (kao na teodoradunja formi),
+    // Blur/touched validacija - error iskače čim klikneš sa strane (kao na teodoradunja formi),
     // ne samo na dugme. Dok je polje u grešci, ispravlja se uživo dok korisnik kuca.
     const touched = {};
     function fieldHasError(name) {
@@ -1063,7 +1063,7 @@ const Form = (function() {
         img.onerror = () => { URL.revokeObjectURL(url); fileErr.textContent = 'Greška pri obradi slike.'; };
         img.src = url;
       } else {
-        // PDF / ostalo — ne može kompresija; mora da bude dovoljno mali
+        // PDF / ostalo - ne može kompresija; mora da bude dovoljno mali
         const reader = new FileReader();
         reader.onload = () => finishMri(file.name, file.type, String(reader.result).split(',')[1] || '');
         reader.onerror = () => { fileErr.textContent = 'Greška pri čitanju fajla.'; };
@@ -1215,7 +1215,7 @@ const Form = (function() {
       saglasnost_dokumentovanje: a.saglasnost_dokumentovanje || '',
       saglasnost_edukativni: a.saglasnost_edukativni || '',
 
-      // MRI fajl — Make: "Google Drive > Upload a file" pa link u Sheets
+      // MRI fajl - Make: "Google Drive > Upload a file" pa link u Sheets
       mr_snimak_fajl_ime: mri ? mri.name : '',
       mr_snimak_fajl_tip: mri ? mri.type : '',
       mr_snimak_fajl_base64: mri ? mri.base64 : '',
@@ -1249,7 +1249,7 @@ const Form = (function() {
           P.S.&nbsp; Dupliraj svoju šansu: Ukoliko ti preporučiš prijatelju da se prijavi i on pobedi - nagradu osvajaš i ti 🍀
         </div>
 
-        <!-- REFERRAL LINK — dolazi kasnije (ceo referral sistem radimo naknadno).
+        <!-- REFERRAL LINK - dolazi kasnije (ceo referral sistem radimo naknadno).
              Ovde ide korisnikov jedinstveni link za deljenje, ispod P.S. teksta. -->
         <div class="thanks__referral" id="referralSlot" hidden></div>
       </div>
