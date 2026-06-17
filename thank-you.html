@@ -55,9 +55,9 @@
   <script>
   (function () {
     // Isti config kao u js/form.js. Kad postaviš REFERRAL_API → ide pravi Supabase backend.
-    var REFERRAL_API = ''; // npr. 'https://lokomoto-referral-system.vercel.app/api/signup'
+    var REFERRAL_API = 'https://lokomoto-referral-system.vercel.app/api/signup'; // pravi Supabase backend
     var GIVEAWAY_SHARE_URL = 'https://kviz.lokomoto.rs/giveaway'; // baza za link (lokalni mod)
-    var DASHBOARD_URL = ''; // Vercel dashboard baza; prazno = sakrij "prati prijave" liniju
+    var DASHBOARD_URL = 'https://lokomoto-referral-system.vercel.app'; // Vercel dashboard baza
 
     var slot = document.getElementById('referralSlot');
     if (!slot) return;

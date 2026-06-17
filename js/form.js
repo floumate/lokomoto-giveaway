@@ -79,7 +79,7 @@ const Form = (function() {
   // REFERRAL SISTEM (lokomoto-referral-system)
   // Popuni REFERRAL_API posle Vercel deploy-a. Ako je prazan, referral se preskače.
   // ============================================
-  const REFERRAL_API = ''; // npr. 'https://lokomoto-referral-system.vercel.app/api/signup' — kad se postavi, ide pravi Supabase backend
+  const REFERRAL_API = 'https://lokomoto-referral-system.vercel.app/api/signup'; // pravi Supabase backend
   const GIVEAWAY_SHARE_URL = 'https://kviz.lokomoto.rs/giveaway'; // baza za referral link (lokalni mod bez Supabase-a)
   const REF_KEY = 'lk_ref';
   const SIGNUP_KEY = 'lk_signup';
